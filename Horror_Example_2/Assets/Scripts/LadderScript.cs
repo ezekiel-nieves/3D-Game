@@ -8,12 +8,14 @@ public class LadderScript : MonoBehaviour
     public float speedUpDown = 3.2f;
     private PlayerMovementAdvanced playerMovement;
     private Rigidbody playerRigidbody;
+    public AudioSource sound;
 
     void Start()
     {
         playerMovement = player.GetComponent<PlayerMovementAdvanced>();
         playerRigidbody = player.GetComponent<Rigidbody>();
         inside = false;
+
     }
 
     void OnTriggerEnter(Collider col)
@@ -32,6 +34,7 @@ public class LadderScript : MonoBehaviour
             Debug.Log("Player exited ladder trigger.");
             playerMovement.enabled = true;
             inside = false;
+            sound.Stop(); // Stop the ladder climbing sound
             isClimbing = false; // Ensure climbing mode is off when leaving ladder
             playerRigidbody.useGravity = true; // Enable gravity after leaving ladder
         }
@@ -58,10 +61,23 @@ public class LadderScript : MonoBehaviour
 
             if (isClimbing && (Input.GetKey("w") || Input.GetKey("s")))
             {
+               
                 float verticalInput = Input.GetAxis("Vertical");
                 Vector3 climbDirection = Vector3.up * verticalInput;
                 playerRigidbody.MovePosition(player.transform.position + climbDirection * (speedUpDown * Time.deltaTime));
             }
+            if (isClimbing && (Input.GetKey("w") || Input.GetKey("s")))
+            {
+                sound.enabled = true;
+                sound.loop = true;
+            }
+            else
+            {
+                sound.enabled = false;
+                sound.loop = false;
+
+            }
+
         }
     }
 }
