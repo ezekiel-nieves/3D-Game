@@ -3,81 +3,110 @@ using UnityEngine;
 public class LadderScript : MonoBehaviour
 {
     public GameObject player;
-    bool inside = false;
-    bool isClimbing = false;
     public float speedUpDown = 3.2f;
     private PlayerMovementAdvanced playerMovement;
     private Rigidbody playerRigidbody;
     public AudioSource sound;
 
+    private bool isClimbing = false;
+    private bool nearLadder = false;
+
     void Start()
     {
         playerMovement = player.GetComponent<PlayerMovementAdvanced>();
         playerRigidbody = player.GetComponent<Rigidbody>();
-        inside = false;
 
+        if (sound != null)
+        {
+            sound.enabled = false;
+        }
     }
 
     void OnTriggerEnter(Collider col)
     {
-        if (col.gameObject.tag == "Ladder")
+        if (col.CompareTag("Ladder") && gameObject.CompareTag("Reach"))
         {
-            Debug.Log("Player entered ladder trigger.");
-            inside = true;
+            Debug.Log("Cursor entered ladder trigger.");
+            nearLadder = true;
         }
     }
 
     void OnTriggerExit(Collider col)
     {
-        if (col.gameObject.tag == "Ladder")
+        if (col.CompareTag("Ladder") && gameObject.CompareTag("Reach"))
         {
-            Debug.Log("Player exited ladder trigger.");
-            playerMovement.enabled = true;
-            inside = false;
-            sound.Stop(); // Stop the ladder climbing sound
-            isClimbing = false; // Ensure climbing mode is off when leaving ladder
-            playerRigidbody.useGravity = true; // Enable gravity after leaving ladder
+            Debug.Log("Cursor exited ladder trigger.");
+            nearLadder = false;
+            if (isClimbing)
+            {
+                StopClimbing();
+            }
         }
     }
 
     void Update()
     {
-        if (inside)
+        if (nearLadder && Input.GetKeyDown(KeyCode.E))
         {
-            if (!isClimbing && Input.GetKeyDown(KeyCode.E))
+            if (!isClimbing)
             {
-                playerMovement.enabled = false;
-                playerRigidbody.useGravity = false; // Disable gravity while on ladder
-
-                isClimbing = true;
-                Debug.Log("Climb ladder by pressing W/S, press E again to exit.");
-            }
-            else if (isClimbing && Input.GetKeyDown(KeyCode.E))
-            {
-                isClimbing = false;
-                playerMovement.enabled = true;
-                Debug.Log("Exited ladder climb mode.");
-            }
-
-            if (isClimbing && (Input.GetKey("w") || Input.GetKey("s")))
-            {
-               
-                float verticalInput = Input.GetAxis("Vertical");
-                Vector3 climbDirection = Vector3.up * verticalInput;
-                playerRigidbody.MovePosition(player.transform.position + climbDirection * (speedUpDown * Time.deltaTime));
-            }
-            if (isClimbing && (Input.GetKey("w") || Input.GetKey("s")))
-            {
-                sound.enabled = true;
-                sound.loop = true;
+                StartClimbing();
             }
             else
             {
-                sound.enabled = false;
-                sound.loop = false;
-
+                StopClimbing();
             }
+        }
 
+        if (isClimbing)
+        {
+            HandleClimbing();
+        }
+    }
+
+    private void StartClimbing()
+    {
+        isClimbing = true;
+        playerMovement.enabled = false;
+        playerRigidbody.useGravity = false; // Disable gravity while on ladder
+
+        Debug.Log("Climb ladder by pressing W/S, press E again to exit.");
+    }
+
+    private void StopClimbing()
+    {
+        isClimbing = false;
+        playerMovement.enabled = true;
+        playerRigidbody.useGravity = true; // Enable gravity after leaving ladder
+
+        if (sound != null && sound.isPlaying)
+        {
+            sound.Stop();
+        }
+
+        Debug.Log("Exited ladder climb mode.");
+    }
+
+    private void HandleClimbing()
+    {
+        float verticalInput = Input.GetAxis("Vertical");
+        if (Mathf.Abs(verticalInput) > 0.1f)
+        {
+            Vector3 climbDirection = Vector3.up * verticalInput;
+            playerRigidbody.MovePosition(player.transform.position + climbDirection * (speedUpDown * Time.deltaTime));
+
+            if (sound != null && !sound.isPlaying)
+            {
+                sound.loop = true;
+                sound.Play();
+            }
+        }
+        else
+        {
+            if (sound != null && sound.isPlaying)
+            {
+                sound.Stop();
+            }
         }
     }
 }
