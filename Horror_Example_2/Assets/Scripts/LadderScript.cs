@@ -18,7 +18,7 @@ public class LadderScript : MonoBehaviour
 
         if (sound != null)
         {
-            sound.enabled = false;
+            sound.enabled = true;
         }
     }
 
