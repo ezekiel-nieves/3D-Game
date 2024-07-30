@@ -104,11 +104,11 @@ public class Doors : MonoBehaviour
     {
         if (isOpen)
         {
-            OpenText.GetComponent<Text>().text = "Press E to Close";
+            OpenText.GetComponent<Text>().text = "Close";
         }
         else
         {
-            OpenText.GetComponent<Text>().text = "Press E to Open";
+            OpenText.GetComponent<Text>().text = "Open";
         }
     }
 }
