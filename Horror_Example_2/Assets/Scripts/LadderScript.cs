@@ -46,7 +46,7 @@ public class LadderScript : MonoBehaviour
 
     void Update()
     {
-        if (nearLadder && Input.GetKeyDown(KeyCode.E))
+        if (nearLadder && Input.GetKeyDown("e"))
         {
             if (!isClimbing)
             {
